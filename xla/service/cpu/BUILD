@@ -238,6 +238,7 @@ cc_library(
         "//xla:xla_proto_cc",
         "//xla/hlo/ir:hlo",
         "//xla/hlo/ir:hlo_module_group",
+        "//xla/hlo/ir:hlo_cpu_instrumentation",
         "//xla/mlir/framework/ir:xla_framework",
         "//xla/mlir/runtime/ir:rt",
         "//xla/mlir/runtime/transforms:calling_convention",

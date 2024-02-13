@@ -74,12 +74,11 @@ class JPrTracer {
     _events.emplace_back(_name, ts, _device_type, _call_stack);
 
     const auto& event = _events[_events.size() - 1];
-    // std::cout << std::setw(30) << event.name << "|";
-    // std::cout << std::setw(20) << std::fixed << std::setprecision(0)
-    //           << (double)event.ts << "|";
-    // std::cout << std::setw(10) << event.args_ptr->device_type << "|";
-    // std::cout << event.args_ptr->call_stack << std::endl;
-    VLOG(1) << "wuhao: callback success.";
+    std::cout << std::setw(30) << event.name << "|";
+    std::cout << std::setw(20) << std::fixed << std::setprecision(0)
+              << (double)event.ts << "|";
+    std::cout << std::setw(10) << event.args_ptr->device_type << "|";
+    std::cout << event.args_ptr->call_stack << std::endl;
 
     return JPrOK;
   }

@@ -52,20 +52,6 @@ int main() {
   std::unique_ptr<xla::PjRtLoadedExecutable> executable = client->Compile(xla_computation, compile_options).value();
   std::cout << "compile success." << std::endl;
 
-  auto compiled_modules = executable->GetHloModules().value();
-  for (auto compiled_module: compiled_modules) {
-    std::cout << "hlomodule before modify: " << std::endl << compiled_module->ToString() << std::endl;
-    std::cout << "=========================" << std::endl;
-    xla::HloCpuInstr cpu_instr;
-    if (!cpu_instr.Run(compiled_module.get()).value()) {
-      std::cout << "cpu instr run fail!" << std::endl;
-    } else {
-      std::cout << "cpu instr run success." << std::endl;
-    }
-    std::cout << "after modify hlomodule: " << std::endl << compiled_module->ToString() << std::endl;
-    std::cout << "=========================" << std::endl;
-  }
-
   auto modified_modules = executable->GetHloModules().value();
   for (auto modified_module: modified_modules) {
     std::cout << "modified module: " << std::endl;

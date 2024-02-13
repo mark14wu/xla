@@ -102,6 +102,7 @@ limitations under the License.
 #include "xla/hlo/ir/hlo_module_group.h"
 #include "xla/hlo/ir/hlo_opcode.h"
 #include "xla/hlo/ir/hlo_schedule.h"
+#include "xla/hlo/ir/hlo_cpu_instrumentation.h"
 #include "xla/layout_util.h"
 #include "xla/map_util.h"
 #include "xla/mlir/framework/ir/xla_framework.h"
@@ -864,6 +865,7 @@ Status CpuCompiler::RunHloPassesThroughLayoutAssn(
         SubByteNormalization::SET_ELEMENT_SIZE);
   }
 
+  pipeline.AddPass<HloCpuInstr>();
   return pipeline.Run(module).status();
 }
 
