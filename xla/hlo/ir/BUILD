@@ -2,6 +2,7 @@
 #   XLA’s HLO Intermediate Representation implementation.
 
 load("@tsl//tsl/platform:rules_cc.bzl", "cc_library")
+load("//xla:xla.bzl", "xla_cc_binary")
 
 package(
     # copybara:uncomment default_applicable_licenses = ["//tensorflow:license"],
@@ -166,4 +167,29 @@ cc_library(
         "@com_google_absl//absl/algorithm:container",
         "@com_google_absl//absl/types:span",
     ],
+)
+
+cc_library(
+    name = "hlo_cpu_instrumentation",
+    srcs = ["hlo_cpu_instrumentation.cc"],
+    hdrs = ["hlo_cpu_instrumentation.h"],
+    deps = [
+        ":hlo",
+        "//xla/service:hlo_pass",
+        "//xla/service:custom_call_target_registry",
+        "//xla/service:custom_call_status",
+    ],
+)
+
+xla_cc_binary(
+    name = "hlo_cpu_instrumentation_test",
+    srcs = ["hlo_cpu_instrumentation_test.cc"],
+    deps = [
+        ":hlo",
+        ":hlo_cpu_instrumentation",
+        "//xla/client:xla_computation",
+        "//xla/pjrt:pjrt_client",
+        "//xla/pjrt:tfrt_cpu_pjrt_client",
+        "//xla/pjrt/gpu:se_gpu_pjrt_client",
+    ]
 )
