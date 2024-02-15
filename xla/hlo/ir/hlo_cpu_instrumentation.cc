@@ -117,6 +117,8 @@ void CpuInstrCallback(void* output, void** inputs, const char* opaque,
 // XLA_REGISTER_CUSTOM_CALL_TARGET_WITH_SYM(symbol, address, "Host")
 XLA_REGISTER_CUSTOM_CALL_TARGET_WITH_SYM("cpu_instrumentation_callback",
                                          &CpuInstrCallback, "Host");
+XLA_REGISTER_CUSTOM_CALL_TARGET_WITH_SYM("cpu_instrumentation_callback",
+                                         &CpuInstrCallback, "CUDA");
 
 /*static*/ StatusOr<bool> HloCpuInstr::RunOnComputation(
     HloComputation* computation) {

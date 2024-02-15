@@ -190,6 +190,16 @@ xla_cc_binary(
         "//xla/client:xla_computation",
         "//xla/pjrt:pjrt_client",
         "//xla/pjrt:tfrt_cpu_pjrt_client",
-        "//xla/pjrt/gpu:se_gpu_pjrt_client",
     ]
+)
+
+xla_cc_binary(
+    name = "hlo_gpu_instrumentation_test",
+    srcs = ["hlo_gpu_instrumentation_test.cc"],
+    local_defines = ["GOOGLE_CUDA=1"],
+    deps = [
+        ":hlo",
+        "//xla/service:gpu_plugin",
+        "//xla/pjrt/gpu:se_gpu_pjrt_client",
+    ],
 )

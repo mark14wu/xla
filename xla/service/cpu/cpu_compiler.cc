@@ -865,7 +865,6 @@ Status CpuCompiler::RunHloPassesThroughLayoutAssn(
         SubByteNormalization::SET_ELEMENT_SIZE);
   }
 
-  pipeline.AddPass<HloCpuInstr>();
   return pipeline.Run(module).status();
 }
 
@@ -965,6 +964,7 @@ Status CpuCompiler::RunHloPassesAfterLayoutAssn(
   pipeline.AddPass<OptimizeInputOutputBufferAlias>(true);
   pipeline.AddPass<CopyInsertion>();
   pipeline.AddPass<HloDCE>();
+  pipeline.AddPass<HloCpuInstr>();
   return pipeline.Run(module).status();
 }
 

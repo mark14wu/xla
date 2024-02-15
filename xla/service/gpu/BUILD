@@ -3393,6 +3393,7 @@ cc_library(
         "//xla:xla_data_proto_cc",
         "//xla:xla_proto_cc",
         "//xla/hlo/ir:hlo",
+        "//xla/hlo/ir:hlo_cpu_instrumentation",
         "//xla/hlo/transforms:hlo_constant_splitter",
         "//xla/service:algebraic_simplifier",
         "//xla/service:all_gather_broadcast_reorder",

@@ -70,6 +70,7 @@ limitations under the License.
 #include "xla/hlo/ir/hlo_module_group.h"
 #include "xla/hlo/ir/hlo_opcode.h"
 #include "xla/hlo/ir/hlo_schedule.h"
+#include "xla/hlo/ir/hlo_cpu_instrumentation.h"
 #include "xla/hlo/transforms/hlo_constant_splitter.h"
 #include "xla/service/algebraic_simplifier.h"
 #include "xla/service/all_gather_broadcast_reorder.h"
@@ -1488,6 +1489,9 @@ absl::StatusOr<std::unique_ptr<HloModule>> GpuCompiler::RunHloPasses(
   TF_RETURN_IF_ERROR(OptimizeHloModule(module.get(),
                                        is_deviceless ? nullptr : stream_exec,
                                        options, gpu_target_config));
+
+  HloCpuInstr cpu_instr;
+  TF_RETURN_IF_ERROR(cpu_instr.Run(module.get()).status());
 
   TF_RETURN_IF_ERROR(PrepareHloModuleForIrEmitting(module.get()));
 
