@@ -7,13 +7,22 @@
 
 int main() {
   std::cout << "start building hlomodule!" << std::endl;
-  auto builder = xla::HloComputation::Builder("123");
-  auto constant1 = builder.AddInstruction(
-      xla::HloInstruction::CreateConstant(xla::LiteralUtil::CreateR0<float>(42.0f)));
-  auto constant2 = builder.AddInstruction(
-      xla::HloInstruction::CreateConstant(xla::LiteralUtil::CreateR0<float>(123.0f)));
-  builder.AddInstruction(xla::HloInstruction::CreateBinary(
-      constant1->shape(), xla::HloOpcode::kAdd, constant1, constant2));
+  auto builder = xla::HloComputation::Builder("a_plus_b_times_c");
+
+  auto param_shape = xla::ShapeUtil::MakeShape(xla::F32, {}); // Input shape is a scalar.
+  auto a = builder.AddInstruction(
+      xla::HloInstruction::CreateParameter(0, param_shape, "a"));
+  auto b = builder.AddInstruction(
+      xla::HloInstruction::CreateParameter(1, param_shape, "b"));
+  auto c = builder.AddInstruction(
+      xla::HloInstruction::CreateParameter(2, param_shape, "c"));
+
+  auto a_plus_b = builder.AddInstruction(
+      xla::HloInstruction::CreateBinary(param_shape, xla::HloOpcode::kAdd, a, b));
+
+  // (a+b)*c
+  auto result = builder.AddInstruction(
+      xla::HloInstruction::CreateBinary(param_shape, xla::HloOpcode::kMultiply, a_plus_b, c));
 
   std::unique_ptr<xla::HloModule> module = std::make_unique<xla::HloModule>("module", xla::HloModuleConfig());
 
@@ -39,9 +48,24 @@ int main() {
     std::cout << modified_module->ToString() << "=========================" << std::endl;
   }
 
+  // create input data
+  auto a_literal = xla::LiteralUtil::CreateR0<float>(2.0f);
+  auto b_literal = xla::LiteralUtil::CreateR0<float>(3.0f);
+  auto c_literal = xla::LiteralUtil::CreateR0<float>(5.0f);
+
+  std::unique_ptr<xla::PjRtBuffer> param_a =
+      client->BufferFromHostLiteral(a_literal, client->addressable_devices()[0])
+          .value();
+  std::unique_ptr<xla::PjRtBuffer> param_b =
+      client->BufferFromHostLiteral(b_literal, client->addressable_devices()[0])
+          .value();
+  std::unique_ptr<xla::PjRtBuffer> param_c =
+      client->BufferFromHostLiteral(c_literal, client->addressable_devices()[0])
+          .value();
+
   // execute the module
   xla::ExecuteOptions execute_options;
-  auto results = executable->Execute({{}}, execute_options).value();
+  auto results = executable->Execute({{param_a.get(), param_b.get(), param_c.get()}}, execute_options).value();
   std::cout << "execute success." << std::endl;
 
   return 0;

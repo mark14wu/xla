@@ -1490,10 +1490,12 @@ absl::StatusOr<std::unique_ptr<HloModule>> GpuCompiler::RunHloPasses(
                                        is_deviceless ? nullptr : stream_exec,
                                        options, gpu_target_config));
 
+
+  TF_RETURN_IF_ERROR(PrepareHloModuleForIrEmitting(module.get()));
+
   HloCpuInstr cpu_instr;
   TF_RETURN_IF_ERROR(cpu_instr.Run(module.get()).status());
 
-  TF_RETURN_IF_ERROR(PrepareHloModuleForIrEmitting(module.get()));
 
   uint64_t end_usecs = tsl::Env::Default()->NowMicros();
 
