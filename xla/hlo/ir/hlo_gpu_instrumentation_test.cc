@@ -44,8 +44,9 @@ int main() {
 
   auto modified_modules = executable->GetHloModules().value();
   for (auto modified_module: modified_modules) {
-    std::cout << "modified module: " << std::endl;
-    std::cout << modified_module->ToString() << "=========================" << std::endl;
+    std::cout << "================================== modified module: ==================================" << std::endl;
+    std::cout << modified_module->ToString();
+    std::cout << "======================================================================================" << std::endl;
   }
 
   // create input data
