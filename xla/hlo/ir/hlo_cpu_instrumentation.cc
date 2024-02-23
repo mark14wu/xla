@@ -21,6 +21,7 @@ limitations under the License.
 #include <memory>
 #include <utility>
 #include <vector>
+#include <thread>
 
 #include "absl/base/dynamic_annotations.h"
 #include "absl/container/flat_hash_map.h"
@@ -74,6 +75,7 @@ class JPrTracer {
     _events.emplace_back(_name, ts, _device_type, _call_stack);
 
     const auto& event = _events[_events.size() - 1];
+    std::cout << "[" << std::this_thread::get_id() << "] ";
     std::cout << "entering...";
     std::cout << std::setw(30) << event.name << "|";
     std::cout << std::setw(20) << std::fixed << std::setprecision(0)
@@ -92,6 +94,7 @@ class JPrTracer {
     _events.emplace_back(_name, ts, _device_type, _call_stack);
 
     const auto& event = _events[_events.size() - 1];
+    std::cout << "[" << std::this_thread::get_id() << "] ";
     std::cout << "exiting...";
     std::cout << std::setw(30) << event.name << "|";
     std::cout << std::setw(20) << std::fixed << std::setprecision(0)
@@ -176,7 +179,7 @@ StatusOr<bool> HloCpuInstr::Run(
 
   std::vector<xla::HloInstruction*> instructions;
   std::cout << "traversing instructions..." << std::endl;
-  for (xla::HloInstruction* instruction : main_computation->instructions()) {
+  for (xla::HloInstruction* instruction : main_computation->MakeInstructionPostOrder()) {
     std::cout << "op_name: " << instruction->name() << "; op_code: "<< xla::HloOpcodeString(instruction->opcode()) << std::endl;
     if (instruction->opcode() == HloOpcode::kParameter){
       continue;
@@ -184,7 +187,9 @@ StatusOr<bool> HloCpuInstr::Run(
     instructions.push_back(instruction);
   }
   std::cout << "traversing success." << std::endl;
+  void* last_instr = nullptr;
   for (xla::HloInstruction* instruction : instructions) {
+    std::cout << "instrumenting instruction: " << instruction->name() << std::endl;
     auto instr_enter = Cast<HloCustomCallInstruction>(
       main_computation->AddInstruction(HloInstruction::CreateCustomCall(
         ShapeUtil::MakeShape(F32, {}),
@@ -201,6 +206,10 @@ StatusOr<bool> HloCpuInstr::Run(
         CustomCallApiVersion::API_VERSION_STATUS_RETURNING_UNIFIED)));
     instr_enter->set_custom_call_has_side_effect(true);
     instr_exit->set_custom_call_has_side_effect(true);
+    if (last_instr != nullptr) {
+      auto last_dep = (HloCustomCallInstruction*)last_instr;
+      TF_RETURN_IF_ERROR(last_dep->AddControlDependencyTo(instr_enter));
+    }
     TF_RETURN_IF_ERROR(instruction->AddControlDependencyTo(instr_exit));
     TF_RETURN_IF_ERROR(instr_enter->AddControlDependencyTo(instruction));
     for (xla::HloInstruction* user : instruction->users()) {
@@ -209,6 +218,7 @@ StatusOr<bool> HloCpuInstr::Run(
     for (xla::HloInstruction* operand : instruction->operands()) {
       TF_RETURN_IF_ERROR(operand->AddControlDependencyTo(instr_enter));
     }
+    last_instr = (void*)instr_exit;
   }
 
   return changed;
