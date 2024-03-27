@@ -34,14 +34,12 @@ limitations under the License.
 #include "xla/hlo/ir/hlo_instructions.h"
 #include "xla/hlo/ir/hlo_module.h"
 #include "xla/hlo/ir/hlo_opcode.h"
+#include "xla/hlo/ir/hlo_op_metadata.h"
 #include "xla/status.h"
 #include "xla/status_macros.h"
 #include "xla/statusor.h"
 #include "xla/types.h"
 #include "xla/util.h"
-// #include "tensorflow/core/lib/core/errors.h"
-// #include "tensorflow/core/platform/errors.h"
-// #include "tensorflow/core/platform/logging.h"
 namespace xla {
 
 namespace jpr {
@@ -219,6 +217,19 @@ StatusOr<bool> HloCpuInstr::Run(
       TF_RETURN_IF_ERROR(operand->AddControlDependencyTo(instr_enter));
     }
     last_instr = (void*)instr_exit;
+  }
+  std::cout << "------------------";
+  std::cout << "printing metadata, including file and line no.";
+  std::cout << "------------------" << std::endl;
+  for (xla::HloInstruction* instruction: instructions) {
+    auto metadata = instruction->metadata();
+    if (!metadata.op_type().empty() || \
+      !metadata.op_name().empty() || \
+      !metadata.source_file().empty()) {
+      std::cout << "metadata={";
+      std::cout << xla::OpMetadataToString(metadata, false);
+      std::cout << "}" << std::endl;
+    }
   }
 
   return changed;
